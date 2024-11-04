@@ -99,6 +99,34 @@ async function approveUser() {
     console.log(chalk.red(err));
   }
 }
+async function playgroundJSONphoto() {
+  const answers = await inquirer.prompt({
+    name: "email",
+    type: "input",
+    message: "Enter user's email address",
+    prefix: "",
+  });
+
+  const email = answers.email;
+
+  try {
+    const user = await admin.auth().getUserByEmail(email);
+    const json = { a: "Testy test testing test" };
+    const encodedJson = encodeURIComponent(JSON.stringify(json));
+    if (user.photoURL === `https://a.io/${encodedJson}`) {
+      console.log(chalk.yellow("JSON encoded already!"));
+      return;
+    }
+
+    const updatedUser = await admin.auth().updateUser(user.uid, {
+      photoURL: `https://a.io/${encodedJson}`,
+    });
+    console.log(chalk.green("JSON encoded"));
+    console.log(updatedUser);
+  } catch (err) {
+    console.log(chalk.red(err));
+  }
+}
 async function getUserByEmail() {
   const answers = await inquirer.prompt({
     name: "email",
@@ -165,6 +193,8 @@ async function menu() {
       new inquirer.Separator(),
       "Workaround: Approve user with photoURL",
       new inquirer.Separator(),
+      "Playground: store JSON inside photoURL",
+      new inquirer.Separator(),
       "Exit",
     ],
   });
@@ -178,6 +208,9 @@ async function menu() {
       break;
     case "Workaround: Approve user with photoURL":
       await approveUser();
+      break;
+    case "Playground: store JSON inside photoURL":
+      await playgroundJSONphoto();
       break;
     case "Disable user":
       await disableUser();
