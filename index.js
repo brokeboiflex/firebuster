@@ -20,8 +20,8 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 //#endregion
-
-async function approveUser() {
+//#region functions
+async function enableUser() {
   const answers = await inquirer.prompt({
     name: "email",
     type: "input",
@@ -35,19 +35,19 @@ async function approveUser() {
     const user = await admin.auth().getUserByEmail(email);
 
     if (!user.disabled) {
-      console.log(chalk.yellow("User approved already!"));
+      console.log(chalk.yellow("User enabled already!"));
 
       return;
     }
     const updatedUser = await admin
       .auth()
       .updateUser(user.uid, { disabled: false });
-    console.log(chalk.green("User approved"));
+    console.log(chalk.green("User enabled"));
   } catch (err) {
     console.log(chalk.red(err));
   }
 }
-async function banUser() {
+async function disableUser() {
   const answers = await inquirer.prompt({
     name: "email",
     type: "input",
@@ -61,19 +61,60 @@ async function banUser() {
     const user = await admin.auth().getUserByEmail(email);
 
     if (user.disabled) {
-      console.log(chalk.yellow("User banned already!"));
+      console.log(chalk.yellow("User disabled already!"));
       return;
     }
 
     const updatedUser = await admin
       .auth()
       .updateUser(user.uid, { disabled: true });
-    console.log(chalk.green("User banned"));
+    console.log(chalk.green("User disabled"));
   } catch (err) {
     console.log(chalk.red(err));
   }
 }
+async function approveUser() {
+  const answers = await inquirer.prompt({
+    name: "email",
+    type: "input",
+    message: "Enter user's email address",
+    prefix: "",
+  });
 
+  const email = answers.email;
+
+  try {
+    const user = await admin.auth().getUserByEmail(email);
+
+    if (user.photoURL === "https://this-site-doesnt-exist.com/approved") {
+      console.log(chalk.yellow("User approved already!"));
+      return;
+    }
+
+    const updatedUser = await admin.auth().updateUser(user.uid, {
+      photoURL: "https://this-site-doesnt-exist.com/approved",
+    });
+    console.log(chalk.green("User approved"));
+  } catch (err) {
+    console.log(chalk.red(err));
+  }
+}
+async function getUserByEmail() {
+  const answers = await inquirer.prompt({
+    name: "email",
+    type: "input",
+    message: "Enter user's email address",
+    prefix: "",
+  });
+  const email = answers.email;
+  try {
+    const user = await admin.auth().getUserByEmail(email);
+    console.log(user);
+  } catch (err) {
+    console.log(chalk.red(err));
+  }
+}
+//#endregion
 //#region ui
 let appLoaded = false;
 let lastFrame;
@@ -116,15 +157,30 @@ async function menu() {
     message: "What do you want to do?",
     prefix: "",
     type: "list",
-    choices: ["Approve user", "Ban user", new inquirer.Separator(), "Exit"],
+    choices: [
+      "Get user by email",
+      new inquirer.Separator(),
+      "Enable user",
+      "Disable user",
+      new inquirer.Separator(),
+      "Workaround: Approve user with photoURL",
+      new inquirer.Separator(),
+      "Exit",
+    ],
   });
 
   switch (answers.options) {
-    case "Approve user":
+    case "Get user by email":
+      await getUserByEmail();
+      break;
+    case "Enable user":
+      await enableUser();
+      break;
+    case "Workaround: Approve user with photoURL":
       await approveUser();
       break;
-    case "Ban user":
-      await banUser();
+    case "Disable user":
+      await disableUser();
       break;
     case "Exit":
       console.clear();
