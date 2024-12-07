@@ -1,0 +1,32 @@
+{
+  "nodemailer_config": {
+    "service": "gmail",
+    "auth": {
+      "user": "youremail@gmail.com",
+      "pass": "yourpassword"
+    }
+  },
+  "functions": {
+    "enableUser": {
+      "email_notification": {
+        "enabled": true,
+        "subject": "Your account is now enabled",
+        "message": "Hi, DISPLAY_NAME, your account is now enabled"
+      }
+    },
+    "disableUser": {
+      "email_notification": {
+        "enabled": true,
+        "subject": "Your account is now disabled",
+        "message": "Hi, DISPLAY_NAME, your account is now disabled"
+      }
+    },
+    "approveUser": {
+      "email_notification": {
+        "enabled": false,
+        "subject": "Your account is now approved",
+        "message": "Hi, DISPLAY_NAME, your account is now approved, you can start using our app now"
+      }
+    }
+  }
+}
